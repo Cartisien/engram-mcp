@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "CommonJS",
+    "moduleResolution": "node",
     "outDir": "./dist",
     "rootDir": ".",
     "strict": true,
@@ -10,5 +10,8 @@
     "skipLibCheck": true,
     "declaration": true
   },
-  "include": ["src/**/*", "engram.ts"]
+  "include": [
+    "src/**/*",
+    "engram.ts"
+  ]
 }
