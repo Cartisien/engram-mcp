@@ -1,5 +1,9 @@
 # @cartisien/engram-mcp
 
+<a href="https://glama.ai/mcp/servers/Cartisien/engram-mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/Cartisien/engram-mcp/badge" />
+</a>
+
 > Persistent semantic memory for AI agents — MCP server powered by [@cartisien/engram](https://github.com/Cartisien/engram)
 
 Give any MCP-compatible AI client (Claude Desktop, Cursor, Windsurf) persistent memory that survives across sessions.
