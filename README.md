@@ -8,6 +8,10 @@ Give any MCP-compatible AI client (Claude Desktop, Cursor, Windsurf) persistent 
 npx -y @cartisien/engram-mcp
 ```
 
+<a href="https://glama.ai/mcp/servers/Cartisien/engram-mcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/Cartisien/engram-mcp/badge" alt="engram-mcp MCP server" />
+</a>
+
 ---
 
 ## What it does
