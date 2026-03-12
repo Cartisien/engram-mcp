@@ -1,3 +1,3 @@
 node_modules/
-dist/
+# dist/ — committed for Docker builds
 *.db
