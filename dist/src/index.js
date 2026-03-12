@@ -56,7 +56,7 @@ const memory = new engram_1.Engram({
     graphModel: GRAPH_MODEL,
     consolidateModel: CONSOLIDATE_MODEL,
 });
-const server = new index_js_1.Server({ name: 'engram', version: '0.2.0' }, { capabilities: { tools: {} } });
+const server = new index_js_1.Server({ name: 'engram', version: '0.3.0' }, { capabilities: { tools: {} } });
 server.setRequestHandler(types_js_1.ListToolsRequestSchema, async () => ({
     tools: [
         // ── Session memory ──────────────────────────────────────────────────
@@ -217,6 +217,67 @@ server.setRequestHandler(types_js_1.ListToolsRequestSchema, async () => ({
                 required: ['userId'],
             },
         },
+        // ── Temporal & export tools ────────────────────────────────────────
+        {
+            name: 'recall_by_time',
+            description: 'Query memories using natural language time expressions like "yesterday", "last week", "this morning", "before 3pm".',
+            inputSchema: {
+                type: 'object',
+                properties: {
+                    sessionId: { type: 'string', description: 'Session identifier' },
+                    expression: { type: 'string', description: 'Natural language time expression like "yesterday", "last week", "before Monday"' },
+                    limit: { type: 'number', description: 'Max results (default 10)', default: 10 },
+                },
+                required: ['sessionId', 'expression'],
+            },
+        },
+        {
+            name: 'recall_recent',
+            description: 'Get the N most recent memories for a session — no query needed.',
+            inputSchema: {
+                type: 'object',
+                properties: {
+                    sessionId: { type: 'string', description: 'Session identifier' },
+                    limit: { type: 'number', description: 'Number of recent memories to return (default 20)', default: 20 },
+                },
+                required: ['sessionId'],
+            },
+        },
+        {
+            name: 'daily_summary',
+            description: 'Returns a summary of memories for a given date (YYYY-MM-DD), or today if omitted.',
+            inputSchema: {
+                type: 'object',
+                properties: {
+                    sessionId: { type: 'string', description: 'Session identifier' },
+                    date: { type: 'string', description: 'ISO date string YYYY-MM-DD (optional, defaults to today)' },
+                },
+                required: ['sessionId'],
+            },
+        },
+        {
+            name: 'temporal_stats',
+            description: 'Returns temporal statistics about when memories were created — frequency over time, most active periods.',
+            inputSchema: {
+                type: 'object',
+                properties: {
+                    sessionId: { type: 'string', description: 'Session identifier' },
+                },
+                required: ['sessionId'],
+            },
+        },
+        {
+            name: 'export_memories',
+            description: 'Export all session memories as markdown or JSON.',
+            inputSchema: {
+                type: 'object',
+                properties: {
+                    sessionId: { type: 'string', description: 'Session identifier' },
+                    format: { type: 'string', enum: ['markdown', 'json'], description: 'Export format (default "markdown")', default: 'markdown' },
+                },
+                required: ['sessionId'],
+            },
+        },
     ],
 }));
 server.setRequestHandler(types_js_1.CallToolRequestSchema, async (request) => {
@@ -297,6 +358,32 @@ server.setRequestHandler(types_js_1.CallToolRequestSchema, async (request) => {
                 const stats = await memory.userStats(args.userId);
                 return { content: [{ type: 'text', text: JSON.stringify(stats, null, 2) }] };
             }
+            // ── Temporal & export ────────────────────────────────────────────
+            case 'recall_by_time': {
+                const entries = await memory.recallByTime(args.sessionId, args.expression, args.limit || 10);
+                return { content: [{ type: 'text', text: JSON.stringify(entries, null, 2) }] };
+            }
+            case 'recall_recent': {
+                const entries = await memory.recallRecent(args.sessionId, args.limit || 20);
+                return { content: [{ type: 'text', text: JSON.stringify(entries, null, 2) }] };
+            }
+            case 'daily_summary': {
+                const summary = await memory.dailySummary(args.sessionId, args.date);
+                return { content: [{ type: 'text', text: JSON.stringify(summary, null, 2) }] };
+            }
+            case 'temporal_stats': {
+                const stats = await memory.temporalStats(args.sessionId);
+                return { content: [{ type: 'text', text: JSON.stringify(stats, null, 2) }] };
+            }
+            case 'export_memories': {
+                const format = args.format || 'markdown';
+                const entries = await memory.history(args.sessionId, 9999);
+                if (format === 'json') {
+                    return { content: [{ type: 'text', text: JSON.stringify({ count: entries.length, memories: entries }, null, 2) }] };
+                }
+                const md = entries.map((e) => `## [${e.timestamp || e.created_at}] [${e.role}]\n${e.content}\n---`).join('\n\n');
+                return { content: [{ type: 'text', text: `# Exported ${entries.length} memories\n\n${md}` }] };
+            }
             default:
                 return {
                     content: [{ type: 'text', text: `Unknown tool: ${name}` }],
@@ -314,7 +401,7 @@ server.setRequestHandler(types_js_1.CallToolRequestSchema, async (request) => {
 async function main() {
     const transport = new stdio_js_1.StdioServerTransport();
     await server.connect(transport);
-    process.stderr.write('Engram MCP server v0.2.0 running\n');
+    process.stderr.write('Engram MCP server v0.3.0 running\n');
 }
 main().catch((err) => {
     process.stderr.write(`Fatal: ${err.message}\n`);
