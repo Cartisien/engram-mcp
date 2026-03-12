@@ -1,7 +1,7 @@
 {
   "name": "@cartisien/engram-mcp",
   "version": "0.2.0",
-  "description": "MCP server for @cartisien/engram — persistent semantic memory for AI agents",
+  "description": "MCP server for @cartisien/engram \u2014 persistent semantic memory for AI agents",
   "type": "module",
   "main": "dist/src/index.js",
   "bin": {
@@ -20,5 +20,6 @@
     "@types/node": "^20.0.0",
     "typescript": "^5.0.0",
     "vitest": "^2.0.0"
-  }
+  },
+  "license": "MIT"
 }
