@@ -1,11 +1,46 @@
 #!/usr/bin/env node
-import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { CallToolRequestSchema, ListToolsRequestSchema, } from '@modelcontextprotocol/sdk/types.js';
-import { Engram } from '@cartisien/engram';
-import * as os from 'os';
-import * as path from 'path';
-import * as fs from 'fs';
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+const index_js_1 = require("@modelcontextprotocol/sdk/server/index.js");
+const stdio_js_1 = require("@modelcontextprotocol/sdk/server/stdio.js");
+const types_js_1 = require("@modelcontextprotocol/sdk/types.js");
+const engram_1 = require("@cartisien/engram");
+const os = __importStar(require("os"));
+const path = __importStar(require("path"));
+const fs = __importStar(require("fs"));
 const DB_PATH = process.env.ENGRAM_DB || path.join(os.homedir(), '.engram', 'memory.db');
 const EMBEDDING_URL = process.env.ENGRAM_EMBEDDING_URL || 'http://192.168.68.73:11434';
 const GRAPH_MODEL = process.env.ENGRAM_GRAPH_MODEL || 'qwen2.5:32b';
@@ -13,7 +48,7 @@ const CONSOLIDATE_MODEL = process.env.ENGRAM_CONSOLIDATE_MODEL || 'qwen2.5:32b';
 const dbDir = path.dirname(DB_PATH);
 if (!fs.existsSync(dbDir))
     fs.mkdirSync(dbDir, { recursive: true });
-const memory = new Engram({
+const memory = new engram_1.Engram({
     dbPath: DB_PATH,
     embeddingUrl: EMBEDDING_URL,
     semanticSearch: true,
@@ -21,8 +56,8 @@ const memory = new Engram({
     graphModel: GRAPH_MODEL,
     consolidateModel: CONSOLIDATE_MODEL,
 });
-const server = new Server({ name: 'engram', version: '0.2.0' }, { capabilities: { tools: {} } });
-server.setRequestHandler(ListToolsRequestSchema, async () => ({
+const server = new index_js_1.Server({ name: 'engram', version: '0.2.0' }, { capabilities: { tools: {} } });
+server.setRequestHandler(types_js_1.ListToolsRequestSchema, async () => ({
     tools: [
         // ── Session memory ──────────────────────────────────────────────────
         {
@@ -184,7 +219,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
         },
     ],
 }));
-server.setRequestHandler(CallToolRequestSchema, async (request) => {
+server.setRequestHandler(types_js_1.CallToolRequestSchema, async (request) => {
     const { name, arguments: args = {} } = request.params;
     try {
         switch (name) {
@@ -277,7 +312,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 });
 async function main() {
-    const transport = new StdioServerTransport();
+    const transport = new stdio_js_1.StdioServerTransport();
     await server.connect(transport);
     process.stderr.write('Engram MCP server v0.2.0 running\n');
 }
