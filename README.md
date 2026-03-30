@@ -69,6 +69,10 @@ Add to your MCP config:
 
 ---
 
+## Hosted deployment
+
+A hosted deployment is available on [Fronteir AI](https://fronteir.ai/mcp/cartisien-engram-mcp).
+
 ## Configuration
 
 | Env Var | Default | Description |
